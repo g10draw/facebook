@@ -18,3 +18,10 @@ class Comment(models.Model):
         on_delete=models.CASCADE)
     text = models.TextField()
     commented_at = models.DateTimeField(auto_now_add=True)
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(CustomUser, related_name='following', 
+        on_delete=models.CASCADE)
+    following = models.ForeignKey(CustomUser, related_name='followers', 
+        on_delete=models.CASCADE)
