@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block titile %}Timeline{% endblock %}
+
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block content %}
+<div>
+    <div class="row">
+        <div class="col-3">
+            Profile Details
+        </div>
+        <div class="col-6">
+            <!-- Create New Post -->
+            <form method="POST">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="text-center">
+                    <button class="btn rounded-pill btn-md btn-primary" type="submit">Post</button>
+                </div>
+            </form>
+
+            <!-- Display Posts -->
+            <div class="mt-5">
+                <div>
+                    {% for post in posts %}
+                        <div class="card mx-auto m-3" style="width: 600px;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{post.title}}</h5>
+                            </div>
+                            <div>
+                                <img src="{{post.image.url}}" alt="Post Image" width="300" />
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            People To Follow
+        </div>
+    </div>
+</div>
+{% endblock %}
