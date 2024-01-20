@@ -35,3 +35,23 @@ def create_post(request):
     serializer = PostSerializer(new_post)
 
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PUT'])
+@login_required
+def update_like(request):
+    post_id = request.data.get('post_id')
+    user = request.user
+
+    post = Post.objects.get(pk=post_id)
+
+    if user in post.likes.all():
+        post.likes.remove(user)
+    else:
+        post.likes.add(user)
+    
+    post.save()
+
+    serializer = PostSerializer(post)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+    
