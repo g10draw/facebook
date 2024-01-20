@@ -40,6 +40,7 @@
                 {{ form|crispy }}
                 <div class="text-center">
                     <button
+                      id="submitButton"
                       class="btn rounded-pill btn-md btn-primary"
                       onclick="submitForm()"
                     >
@@ -75,18 +76,28 @@
                                 <h5 class="card-title m-2">{{post.title}}</h5>
                             </div>
                             <!-- Post Image -->
-                            <div class="text-center mb-3">
-                                <img src="{{post.image.url}}" alt="Post Image" width="300" />
-                            </div>
+                            {% if post.image %}
+                                <div class="text-center mb-3">
+                                    <img src="{{post.image.url}}" alt="Post Image" width="300" />
+                                </div>
+                            {% endif %}
                             <!-- Post Actions -->
                             <div class="row justify-content-start m-3 g-3">
                                 <div class="col-2">
-                                    {% if request.user in post.likes.all %}
-                                        <i class="bi bi-heart-fill text-danger"></i>
-                                    {% else %}
-                                        <i class="bi bi-heart"></i>
-                                    {% endif %}
-                                    {{post.likes.all|length}}
+                                    <span
+                                      class="like-icon"
+                                      data-post-id="{{post.id}}"
+                                      onclick="handleLikeClick(this)"
+                                    >
+                                        {% if request.user.username in post.likes.all %}
+                                            <i class="bi bi-heart-fill text-danger"></i>
+                                        {% else %}
+                                            <i class="bi bi-heart"></i>
+                                        {% endif %}
+                                        <span class="like-count">
+                                            {{post.likes.all|length}}
+                                        </span>
+                                    </span>
                                 </div>
                                 <div class="col-2">Comments</div>
                             </div>
@@ -102,6 +113,8 @@
 </div>
 
 <script>
+
+    // New Post
     function submitForm() {
         event.preventDefault()
 
@@ -109,6 +122,8 @@
 
         // Form Data
         var formData = new FormData(form)
+
+        document.getElementById('submitButton').disabled = true
 
         fetch('http://127.0.0.1:8000/create-post', {
             method: 'POST',
@@ -156,6 +171,36 @@
         .catch(error => {
             console.error('Error posting data', error)
         })
+        .finally(resp => {
+            document.getElementById('submitButton').disabled = false
+        })
+    }
+
+    // Update Like
+    function handleLikeClick(likeIcon) {
+        var postId = likeIcon.getAttribute('data-post-id');
+        var csrf_token = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+
+        fetch('http://127.0.0.1:8000/update-like', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf_token
+            },
+            body: JSON.stringify({'post_id': postId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            var likeCountElement = document.querySelector(`.like-icon[data-post-id="${postId}"] .like-count`);
+            likeCountElement.textContent = data.likes.length
+
+            var heartIcon = document.querySelector(`.like-icon[data-post-id="${postId}"] i`);
+            heartIcon.classList.toggle('bi-heart');
+            heartIcon.classList.toggle('bi-heart-fill');
+            heartIcon.classList.toggle('text-danger');
+        })
+        .catch(error => console.error('Error: ', error))
     }
 </script>
 {% endblock %}
