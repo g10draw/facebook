@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Post, CustomUser
+from .models import Post, CustomUser, Comment
 
 class AuthorSerializer(ModelSerializer):
     class Meta:
@@ -19,3 +19,10 @@ class PostSerializer(ModelSerializer):
         ret = super().to_representation(instance)
         ret['likes'] = [user.username for user in self.instance.likes.all()]
         return ret
+
+
+class CommentSerializer(ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
