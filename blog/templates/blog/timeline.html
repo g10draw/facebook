@@ -89,7 +89,7 @@
                                       data-post-id="{{post.id}}"
                                       onclick="handleLikeClick(this)"
                                     >
-                                        {% if request.user.username in post.likes.all %}
+                                        {% if request.user in post.likes.all %}
                                             <i class="bi bi-heart-fill text-danger"></i>
                                         {% else %}
                                             <i class="bi bi-heart"></i>
