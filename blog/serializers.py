@@ -26,3 +26,8 @@ class CommentSerializer(ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
+    
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['user'] = self.instance.user.username
+        return ret
