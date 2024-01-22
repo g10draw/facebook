@@ -141,3 +141,6 @@ GitHub.sublime-settings
 
 # Untrack production settings
 settings.py
+
+# VS Code Settings
+.hintrc
