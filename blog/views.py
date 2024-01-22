@@ -15,7 +15,7 @@ def home_page(request):
 
 def timeline_page(request):
     form = PostForm()
-    posts = Post.objects.all().order_by('-posted_at')
+    posts = Post.objects.prefetch_related('comments__user').order_by('-posted_at')
     return render(request, 'blog/timeline.html', 
         {'form': form, 'posts': posts})
 
@@ -61,7 +61,7 @@ def add_comment(request, post_id):
     user = request.user
     post = Post.objects.get(pk=post_id)
     data = request.data
-    new_comment = Comment(user=user, post=post, text=data.get('text'))
+    new_comment = Comment(user=user, post=post, text=data.get('comment'))
     new_comment.save()
 
     serializer = CommentSerializer(new_comment)
