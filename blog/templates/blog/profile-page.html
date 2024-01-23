@@ -1,7 +1,314 @@
 {% extends 'base.html' %}
 
-{% block titile %}Home{% endblock %}
+{% block titile %}Profile{% endblock %}
 
 {% block content %}
-<h1>Profile Page</h1>
+<div class="m-5">
+    <div class="row justify-content-start">
+        <!-- Profile Card -->
+        <div class="col-4">
+            <div class="card" style="width: 18rem;">
+                <!-- Profile Image -->
+                <img
+                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                    class="img-fluid rounded mx-auto mt-3"
+                    alt="User Image"
+                    width="100"
+                />
+                <!-- User Details -->
+                <div class="card-body text-center mt-1">
+                    <h5 class="card-title text-primary">
+                        {{ profile.username|title}}
+                    </h5>
+                    <p class="text-secondary mt-1"><i>{{ profile.email}}</i></p>
+                </div>
+
+                <!-- Follow/Unfollow Button -->
+                {% if request.user.username != profile.username %}
+                    <form method="POST" action="{% url 'handle-follow' user_id=profile.id %}">
+                        {% csrf_token %}
+                        {% if am_i_following %}
+                            <!-- Unfollow -->
+                            <div class="text-center mb-3">
+                                <button type="submit" class="btn btn-outline-danger">
+                                    Unfollow
+                                </button>
+                            </div>
+                        {% else %}
+                            <!-- Follow -->
+                            <div class="text-center mb-3">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    Follow
+                                </button>
+                            </div>
+                        {% endif %}
+                    </form>
+                {% endif %}
+
+                <!-- Follower Details -->
+                <div class="row justify-content-between text-primary gx-3 mx-3 mb-2">
+                    <div class="col"><b>Followers</b> {{ followers|length }}</div>
+                    <div class="col"><b>Following</b> {{ following|length }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Posts -->
+        <div class="col-8">
+            <div class="text-center text-primary mb-5 display-6">
+                {{ profile.username|title }} Posts
+            </div>
+
+            <div id="postContainer">
+                {% for post in posts %}
+                    <div class="card mx-auto m-3" style="width: 600px;">
+                        <div class="card-body">
+                            <!-- Post Header -->
+                            <div class="row justify-content-between">
+                                <div class="col-8" style="font-size: 20px;">
+                                    <img
+                                      src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                                      class="img-fluid rounded"
+                                      alt="User Image"
+                                      width="30"
+                                    />
+                                    <a
+                                      class="mx-2"
+                                      style="text-decoration: none;"
+                                      href="{% url 'profile-page' user_id=post.author.id %}"
+                                    >
+                                        <i>{{post.author.username|title}}</i>
+                                    </a>
+                                </div>
+                                <div class="col-4 text-secondary">
+                                    <i>Posted on {{post.posted_at|date:'f a'}}</i>
+                                </div>
+                            </div>
+                            <!-- Post Tilte -->
+                            <h5 class="card-title m-2">{{post.title}}</h5>
+                        </div>
+                        <!-- Post Image -->
+                        {% if post.image %}
+                            <div class="text-center mb-3">
+                                <img src="{{post.image.url}}" alt="Post Image" width="300" />
+                            </div>
+                        {% endif %}
+                        <!-- Post Actions -->
+                        <div class="row justify-content-start m-3 g-3">
+                            <div class="col-2">
+                                <span
+                                  class="like-icon"
+                                  data-post-id="{{post.id}}"
+                                  onclick="handleLikeClick(this)"
+                                >
+                                    {% if request.user in post.likes.all %}
+                                        <i class="bi bi-heart-fill text-danger"></i>
+                                    {% else %}
+                                        <i class="bi bi-heart"></i>
+                                    {% endif %}
+                                    <span class="like-count">
+                                        {{post.likes.all|length}}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="col-2"></div>
+                        </div>
+
+                        <!-- Comments -->
+                        <div class="accordion" id="commentAccordion{{post.id}}">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="commentsHeader{{post.id}}">
+                                    <button
+                                      class="accordion-button"
+                                      type="button"
+                                      data-bs-toggle="collapse"
+                                      data-bs-target="#commentsCollapse{{post.id}}"
+                                      aria-expanded="false"
+                                      aria-controls="commentsCollapse{{post.id}}"
+                                    >
+                                        Comments
+                                    </button>
+                                </h2>
+
+                                <!-- Target Div -->
+                                <div
+                                    id="commentsCollapse{{post.id}}"
+                                    class="accordion-collapse collapse"
+                                    aria-labelledby="commentsHeading{{post.id}}"
+                                >
+                                    <div class="accordion-body">
+                                        <!-- Form -->
+                                        <form method="POST" id="commentForm{{post.id}}" onsubmit="submitComment(event, parseInt(`{{post.id}}`))">
+                                            <div class="mb-3">
+                                                <label for="commentText{{post.id}}" class="form-label">
+                                                    Your Comment
+                                                </label>
+                                                <textarea
+                                                  class="form-control"
+                                                  id="commentText{{post.id}}"
+                                                  name="commentText"
+                                                  rows="3"
+                                                ></textarea>
+                                            </div>
+                                            <div>
+                                                <button
+                                                  class="btn btn-sm btn-primary"
+                                                  id="submitButton{{post.id}}"
+                                                  type="submit"
+                                                >
+                                                    Add Comment
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Previous Comments -->
+                                    <h6 class="text-primary mx-2  my-1">Comments:</h6>
+                                    <div id="commentsContainer{{post.id}}" class="accordion-body">
+                                        {% for comment in post.comments.all|dictsortreversed:"id" %}
+                                            <div id=comment{{comment.id}}>
+                                                <b>{{comment.user.username}}: </b> {{comment.text}} ({{comment.commented_at|timesince}} ago)
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // New Post
+    function submitForm() {
+        event.preventDefault()
+
+        var form = document.getElementById('postForm');
+
+        // Form Data
+        var formData = new FormData(form)
+
+        document.getElementById('submitButton').disabled = true
+
+        fetch('http://127.0.0.1:8000/create-post', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Eroor('Network response was not ok')
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('New Post: ', data)
+            form.reset()
+            var postContainer = document.getElementById('postContainer')
+            postContainer.insertAdjacentHTML('afterbegin', `
+                <div class="card mx-auto m-3" style="width: 600px;">
+                    <div class="card-body">
+                        <!-- Post Header -->
+                        <div class="row justify-content-between">
+                            <div class="col-8" style="font-size: 20px;">
+                                <img
+                                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                                    class="img-fluid rounded"
+                                    alt="User Image"
+                                    width="30"
+                                />
+                                <a class="mx-2" style="text-decoration: none;" href="">
+                                    <i>${data.author.username}</i>
+                                </a>
+                            </div>
+                            <div class="col-4 text-secondary">
+                                <i>Posted on ${new Date(data.posted_at).toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true})}</i>
+                            </div>
+                        </div>
+                        <!-- Post Tilte -->
+                        <h5 class="card-title m-2">${data.title}</h5>
+                    </div>
+                    <div class="text-center mb-3">
+                        <img src="${data.image}" alt="Post Image" width="300" />
+                    </div>
+                </div>
+            `)
+        })
+        .catch(error => {
+            console.error('Error posting data', error)
+        })
+        .finally(resp => {
+            document.getElementById('submitButton').disabled = false
+        })
+    }
+
+    // Update Like
+    function handleLikeClick(likeIcon) {
+        var postId = likeIcon.getAttribute('data-post-id');
+        var csrf_token = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+
+        fetch('http://127.0.0.1:8000/update-like', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf_token
+            },
+            body: JSON.stringify({'post_id': postId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            var likeCountElement = document.querySelector(`.like-icon[data-post-id="${postId}"] .like-count`);
+            likeCountElement.textContent = data.likes.length
+
+            var heartIcon = document.querySelector(`.like-icon[data-post-id="${postId}"] i`);
+            heartIcon.classList.toggle('bi-heart');
+            heartIcon.classList.toggle('bi-heart-fill');
+            heartIcon.classList.toggle('text-danger');
+        })
+        .catch(error => console.error('Error: ', error))
+    }
+
+    // Add Comment
+    function submitComment(event, postId) {
+        event.preventDefault();
+
+        // Get the comment text
+        const form = document.getElementById(`commentForm${postId}`);
+        const commentText = document.getElementById(`commentText${postId}`).value
+
+        var csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value
+
+        document.getElementById(`submitButton${postId}`).disabled = true
+
+        // API request
+        fetch(`http://127.0.0.1:8000/add-comment/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({'comment': commentText})
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            const commentsContainer = document.getElementById(`commentsContainer${postId}`)
+            commentsContainer.insertAdjacentHTML('afterbegin', `
+                <div id=comment${data.id}>
+                    <b>${data.user}: </b> ${data.text} (${moment(data.commented_at).fromNow()})
+                </div>
+            `)
+            form.reset()
+        })
+        .catch(error => {
+            console.error(error)
+        })
+        .finally(resp => {
+            document.getElementById(`submitButton${postId}`).disabled = false
+        })
+    }
+</script>
 {% endblock %}
