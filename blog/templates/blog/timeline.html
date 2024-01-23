@@ -151,7 +151,7 @@
                                         </div>
 
                                         <!-- Previous Comments -->
-                                        <h6 class="text-primary my-1">Previous Comments:</h6>
+                                        <h6 class="text-primary mx-2  my-1">Comments:</h6>
                                         <div id="commentsContainer{{post.id}}" class="accordion-body">
                                             {% for comment in post.comments.all|dictsortreversed:"id" %}
                                                 <div id=comment{{comment.id}}>
