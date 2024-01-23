@@ -4,7 +4,8 @@ from auth_manager.models import CustomUser
 
 # Create your models here.
 class Post(models.Model):
-    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, 
+        related_name='my_posts')
     title = models.TextField()
     image = models.ImageField(upload_to='posts/images/', blank=True, null=True)
     likes = models.ManyToManyField(CustomUser, related_name='my_liked_posts', 
