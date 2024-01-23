@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (timeline_page, home_page, create_post, 
-    update_like, add_comment)
+    update_like, add_comment, profile_page)
 
 
 urlpatterns=[
@@ -10,4 +10,5 @@ urlpatterns=[
     path('create-post', create_post, name='create-post'),
     path('update-like', update_like, name='update-like'),
     path('add-comment/<int:post_id>', add_comment, name='add-comment'),
+    path('profile-page', profile_page, name='profile-page'),
 ]

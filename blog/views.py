@@ -19,6 +19,9 @@ def timeline_page(request):
     return render(request, 'blog/timeline.html', 
         {'form': form, 'posts': posts})
 
+def profile_page(request):
+    return render(request, 'blog/profile-page.html')
+
 @api_view(['POST'])
 @login_required
 def create_post(request):
