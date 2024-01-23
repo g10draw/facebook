@@ -20,15 +20,20 @@
                 />
                 <!-- User Details -->
                 <div class="card-body text-center mt-1">
-                    <h5 class="card-title text-primary">
-                        {{ request.user.username|title}}
-                    </h5>
+                    <a
+                      href="{% url 'profile-page' user_id=request.user.id %}"
+                      style="text-decoration: none;"
+                    >
+                        <h5 class="card-title text-primary">
+                            {{ request.user.username|title}}
+                        </h5>
+                    </a>
                     <p class="text-secondary mt-1"><i>{{ request.user.email}}</i></p>
                 </div>
                 <!-- Follower Details -->
                 <div class="row justify-content-between text-primary gx-3 mx-3 mb-2">
-                    <div class="col"><b>Followers</b> 0</div>
-                    <div class="col"><b>Following</b> 0</div>
+                    <div class="col"><b>Followers</b> {{ followers|length}}</div>
+                    <div class="col"><b>Following</b> {{ following|length}}</div>
                 </div>
             </div>
         </div>
@@ -64,7 +69,11 @@
                                           alt="User Image"
                                           width="30"
                                         />
-                                        <a class="mx-2" style="text-decoration: none;" href="">
+                                        <a
+                                          class="mx-2"
+                                          style="text-decoration: none;"
+                                          href="{% url 'profile-page' user_id=post.author.id %}"
+                                        >
                                             <i>{{post.author.username|title}}</i>
                                         </a>
                                     </div>
@@ -168,7 +177,23 @@
             </div>
         </div>
         <div class="col-3">
-            People To Follow
+            <div class="text-primary">
+                <h5>Prople To Follow</h5>
+            </div>
+            <div class="m-2">
+                {% for person in to_follow %}
+                    <div>
+                        <a
+                          href="{% url 'profile-page' user_id=person.id %}"
+                          style="text-decoration: none;"
+                        >
+                            <h6 class="text-info">
+                                {{person.username|title}}
+                            </h6>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
