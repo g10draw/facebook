@@ -1,26 +1,78 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
 from .forms import PostForm
-from .models import Post, Comment
+from .models import Post, Comment, Follow
+from auth_manager.models import CustomUser
 from .serializers import PostSerializer, CommentSerializer
 
 # Create your views here.
 def home_page(request):
     return render(request, 'blog/home-page.html')
 
+@login_required
 def timeline_page(request):
     form = PostForm()
-    posts = Post.objects.prefetch_related('comments__user').order_by('-posted_at')
-    return render(request, 'blog/timeline.html', 
-        {'form': form, 'posts': posts})
+    following = request.user.following.all()
+    followers = request.user.followers.all()
 
-def profile_page(request):
-    return render(request, 'blog/profile-page.html')
+    following_ids = [follow_obj.following.id for follow_obj in following] + [request.user.id]
+    posts = Post.objects.filter(
+        author__id__in=following_ids).prefetch_related(
+        'comments__user').order_by('-posted_at')
+    
+    # People To Follow
+    to_follow = CustomUser.objects.filter(
+        is_superuser=False).exclude(pk__in=following_ids)
+    return render(request, 'blog/timeline.html', 
+        {
+            'form': form, 
+            'posts': posts,
+            'followers': followers,
+            'following': following,
+            'to_follow': to_follow,
+        }
+    )
+
+@login_required
+def profile_page(request, user_id):
+    profile_user = CustomUser.objects.get(pk=user_id)
+    posts = Post.objects.filter(author=profile_user).order_by('-posted_at')
+    am_i_following = Follow.objects.filter(
+        follower=request.user, following=profile_user).exists()
+    following = profile_user.following.all()
+    followers = profile_user.followers.all()
+    return render(
+        request, 
+        'blog/profile-page.html', 
+        {
+            'profile': profile_user, 
+            'posts': posts,
+            'am_i_following': am_i_following,
+            'followers': followers,
+            'following': following,
+        }
+    )
+
+@login_required
+def handle_follow(request, user_id):
+    profile_user = CustomUser.objects.get(pk=user_id)
+    following = Follow.objects.filter(
+        follower=request.user, following=profile_user)
+    if following:
+        following.delete()
+        messages.error(request, f'Unfollowed {profile_user.username}')
+    else:
+        new_record = Follow.objects.create(
+            follower=request.user, following=profile_user
+        )
+        messages.success(request, f'Following {profile_user.username}')
+    return redirect('profile-page', user_id=user_id)
 
 @api_view(['POST'])
 @login_required
