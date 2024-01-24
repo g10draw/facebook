@@ -139,6 +139,7 @@
                                     <div class="accordion-body">
                                         <!-- Form -->
                                         <form method="POST" id="commentForm{{post.id}}" onsubmit="submitComment(event, parseInt(`{{post.id}}`))">
+                                            {% csrf_token %}
                                             <div class="mb-3">
                                                 <label for="commentText{{post.id}}" class="form-label">
                                                     Your Comment
@@ -182,78 +183,16 @@
 </div>
 
 <script>
-    // New Post
-    function submitForm() {
-        event.preventDefault()
-
-        var form = document.getElementById('postForm');
-
-        // Form Data
-        var formData = new FormData(form)
-
-        document.getElementById('submitButton').disabled = true
-
-        fetch('http://127.0.0.1:8000/create-post', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Eroor('Network response was not ok')
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('New Post: ', data)
-            form.reset()
-            var postContainer = document.getElementById('postContainer')
-            postContainer.insertAdjacentHTML('afterbegin', `
-                <div class="card mx-auto m-3" style="width: 600px;">
-                    <div class="card-body">
-                        <!-- Post Header -->
-                        <div class="row justify-content-between">
-                            <div class="col-8" style="font-size: 20px;">
-                                <img
-                                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                                    class="img-fluid rounded"
-                                    alt="User Image"
-                                    width="30"
-                                />
-                                <a class="mx-2" style="text-decoration: none;" href="">
-                                    <i>${data.author.username}</i>
-                                </a>
-                            </div>
-                            <div class="col-4 text-secondary">
-                                <i>Posted on ${new Date(data.posted_at).toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true})}</i>
-                            </div>
-                        </div>
-                        <!-- Post Tilte -->
-                        <h5 class="card-title m-2">${data.title}</h5>
-                    </div>
-                    <div class="text-center mb-3">
-                        <img src="${data.image}" alt="Post Image" width="300" />
-                    </div>
-                </div>
-            `)
-        })
-        .catch(error => {
-            console.error('Error posting data', error)
-        })
-        .finally(resp => {
-            document.getElementById('submitButton').disabled = false
-        })
-    }
-
     // Update Like
     function handleLikeClick(likeIcon) {
         var postId = likeIcon.getAttribute('data-post-id');
-        var csrf_token = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+        var csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
 
         fetch('http://127.0.0.1:8000/update-like', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrf_token
+                'X-CSRFToken': csrfToken
             },
             body: JSON.stringify({'post_id': postId})
         })
