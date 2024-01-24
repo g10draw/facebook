@@ -8,8 +8,7 @@ class Post(models.Model):
         related_name='my_posts')
     title = models.TextField()
     image = models.ImageField(upload_to='posts/images/', blank=True, null=True)
-    likes = models.ManyToManyField(CustomUser, related_name='my_liked_posts', 
-        null=True, blank=True)
+    likes = models.ManyToManyField(CustomUser, related_name='my_liked_posts')
     posted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
