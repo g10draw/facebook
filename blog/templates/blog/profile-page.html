@@ -188,7 +188,7 @@
         var postId = likeIcon.getAttribute('data-post-id');
         var csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
 
-        fetch('http://127.0.0.1:8000/update-like', {
+        fetch('https://facebook2024.pythonanywhere.com/update-like', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -223,7 +223,7 @@
         document.getElementById(`submitButton${postId}`).disabled = true
 
         // API request
-        fetch(`http://127.0.0.1:8000/add-comment/${postId}`, {
+        fetch(`https://facebook2024.pythonanywhere.com/add-comment/${postId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

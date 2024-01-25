@@ -13,7 +13,7 @@
             <div class="card" style="width: 18rem;">
                 <!-- Profile Image -->
                 <img
-                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                    src="httpss://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                     class="img-fluid rounded mx-auto mt-3"
                     alt="User Image"
                     width="100"
@@ -64,7 +64,7 @@
                                 <div class="row justify-content-between">
                                     <div class="col-8" style="font-size: 20px;">
                                         <img
-                                          src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                                          src="httpss://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                                           class="img-fluid rounded"
                                           alt="User Image"
                                           width="30"
@@ -211,7 +211,7 @@
 
         document.getElementById('submitButton').disabled = true
 
-        fetch('http://127.0.0.1:8000/create-post', {
+        fetch('https://facebook2024.pythonanywhere.com/create-post', {
             method: 'POST',
             body: formData
         })
@@ -232,7 +232,7 @@
                         <div class="row justify-content-between">
                             <div class="col-8" style="font-size: 20px;">
                                 <img
-                                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                                    src="httpss://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                                     class="img-fluid rounded"
                                     alt="User Image"
                                     width="30"
@@ -267,7 +267,7 @@
         var postId = likeIcon.getAttribute('data-post-id');
         var csrf_token = document.getElementsByName('csrfmiddlewaretoken')[0].value;
 
-        fetch('http://127.0.0.1:8000/update-like', {
+        fetch('https://facebook2024.pythonanywhere.com/update-like', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -302,7 +302,7 @@
         document.getElementById(`submitButton${postId}`).disabled = true
 
         // API request
-        fetch(`http://127.0.0.1:8000/add-comment/${postId}`, {
+        fetch(`https://facebook2024.pythonanywhere.com/add-comment/${postId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
